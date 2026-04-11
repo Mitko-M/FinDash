@@ -1,9 +1,10 @@
+import { View, Text, StyleSheet, Pressable } from "react-native";
+import { DropdownInputField } from "../components/ui/DropdownInputField";
+import { InputField } from "../components/ui/InputField";
 import { useState } from "react";
-import { View, Text, TextInput, StyleSheet, Pressable } from "react-native";
-import { Dropdown } from "react-native-element-dropdown";
-import AntDesign from "@expo/vector-icons/AntDesign";
+import DateInputField from "../components/ui/DateInputField";
 
-const data = [
+const categoryData = [
   { label: "Food & Dining", value: "1" },
   { label: "Transport", value: "2" },
   { label: "Shopping", value: "3" },
@@ -14,48 +15,38 @@ const data = [
   { label: "Other Expense", value: "8" },
 ];
 
+const transactionType = [
+  { label: "Expense", value: "1" },
+  { label: "Income", value: "2" },
+];
+
 export default function AddTransactionScreen() {
-  const [value, setValue] = useState(null);
-  const [isFocus, setIsFocus] = useState(false);
+  const [date, setDate] = useState(new Date());
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Add Transaction</Text>
+      <Text style={styles.title}>Add New Transaction</Text>
 
-      <TextInput placeholder="Amount" style={styles.input} />
-      <TextInput placeholder="Description" style={styles.input} />
-      <Dropdown
-        style={[styles.dropdown, isFocus && { borderColor: "blue" }]}
-        placeholderStyle={styles.placeholderStyle}
-        selectedTextStyle={styles.selectedTextStyle}
-        inputSearchStyle={styles.inputSearchStyle}
-        iconStyle={styles.iconStyle}
-        data={data}
-        search
-        maxHeight={300}
-        labelField="label"
-        valueField="value"
-        placeholder={!isFocus ? "Select category" : "..."}
-        searchPlaceholder="Search..."
-        value={value}
-        onFocus={() => setIsFocus(true)}
-        onBlur={() => setIsFocus(false)}
-        onChange={(item) => {
-          setValue(item.value);
-          setIsFocus(false);
-        }}
-        renderLeftIcon={() => (
-          <AntDesign
-            style={styles.icon}
-            color={isFocus ? "blue" : "black"}
-            name="book"
-            size={20}
-          />
-        )}
+      <DropdownInputField
+        data={transactionType}
+        defaultValue="Expense/Income"
+        label="Type"
+        search={false}
       />
+      <DropdownInputField
+        data={categoryData}
+        defaultValue="Select a category"
+        label="Category"
+      />
+      <InputField placeHolder="0.00" label="Amount" />
+      <InputField label="Description" placeHolder="Enter description" />
+      <DateInputField value={date} label="Date" onChange={setDate} />
 
-      <Pressable style={styles.button}>
-        <Text style={styles.buttonText}>Add</Text>
+      <Pressable
+        style={styles.button}
+        onPress={() => console.log("Transaction added")}
+      >
+        <Text style={styles.buttonText}>Add Transaction</Text>
       </Pressable>
     </View>
   );
@@ -64,12 +55,6 @@ export default function AddTransactionScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20 },
   title: { fontSize: 24, fontWeight: "700", marginBottom: 20 },
-  input: {
-    backgroundColor: "#eee",
-    padding: 12,
-    borderRadius: 10,
-    marginBottom: 12,
-  },
   button: {
     backgroundColor: "#4CAF50",
     padding: 16,
@@ -78,37 +63,4 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   buttonText: { color: "white", fontSize: 18, fontWeight: "600" },
-  dropdown: {
-    height: 50,
-    borderColor: "gray",
-    borderWidth: 0.5,
-    borderRadius: 8,
-    paddingHorizontal: 8,
-  },
-  icon: {
-    marginRight: 5,
-  },
-  label: {
-    position: "absolute",
-    backgroundColor: "white",
-    left: 22,
-    top: 8,
-    zIndex: 999,
-    paddingHorizontal: 8,
-    fontSize: 14,
-  },
-  placeholderStyle: {
-    fontSize: 16,
-  },
-  selectedTextStyle: {
-    fontSize: 16,
-  },
-  iconStyle: {
-    width: 20,
-    height: 20,
-  },
-  inputSearchStyle: {
-    height: 40,
-    fontSize: 16,
-  },
 });
