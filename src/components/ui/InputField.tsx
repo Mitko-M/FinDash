@@ -20,6 +20,9 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 10,
     marginBottom: 12,
+    borderColor: "gray",
+    height: 40,
+    borderWidth: 0.5,
   },
   label: {
     marginBottom: 6,
