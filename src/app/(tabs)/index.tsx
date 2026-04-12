@@ -1,9 +1,19 @@
 import { View, Text, ScrollView, StyleSheet, Pressable } from "react-native";
 import { Card } from "@/src/components/ui/Card";
+import { IncomeExpenseChart } from "@/src/components/charts/IncomeExpenseChart";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function HomeScreen() {
+  //? MARK: Later this needs to be user inputted
+  //------------------------------
+  const totalIncome = 5975;
+  const totalExpenses = 670.5;
+  //------------------------------
+
+  const totalBalance = totalIncome - totalExpenses;
+  const savingsRate = totalBalance / (totalIncome / 100);
+
   return (
     <View style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={styles.container}>
@@ -13,39 +23,37 @@ export default function HomeScreen() {
         <View>
           <Card
             title="Total Balance"
-            value="0.00"
-            description="some short message"
+            value={totalBalance}
+            description="12.5% from last month"
             cardIconName="wallet-outline"
             cardIconColor="blue"
           />
           <Card
             title="Total Income"
-            value="0.00"
-            description="some short message"
+            value={totalIncome}
+            description="8.2% from last month"
             cardIconName="trending-up"
             cardIconColor="green"
           />
           <Card
             title="Total Expenses"
-            value="0.00"
-            description="some short message"
+            value={totalExpenses}
+            description="3.1% from last month"
             cardIconName="trending-down"
             isRateDown
             cardIconColor="red"
           />
           <Card
             title="Savings Rate"
-            value="0.00"
-            description="some short message"
+            value={savingsRate}
+            savings
             cardIconName="cash-outline"
             cardIconColor="purple"
           />
         </View>
 
         {/* Charts */}
-        <View style={styles.chartPlaceholder}>
-          <Text>Income vs Expenses Chart</Text>
-        </View>
+        <IncomeExpenseChart />
 
         <View style={styles.chartPlaceholder}>
           <Text>Category Pie Chart</Text>
