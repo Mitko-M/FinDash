@@ -1,4 +1,5 @@
 import { View, Text, ScrollView, StyleSheet, Pressable } from "react-native";
+import { Card } from "@/src/components/ui/Card";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -9,22 +10,36 @@ export default function HomeScreen() {
         <Text style={styles.title}>Finance Tracker</Text>
 
         {/* Summary Cards */}
-        <View style={styles.summaryRow}>
-          <View style={styles.card}>
-            <Text>Total Balance</Text>
-          </View>
-          <View style={styles.card}>
-            <Text>Total Income</Text>
-          </View>
-        </View>
-
-        <View style={styles.summaryRow}>
-          <View style={styles.card}>
-            <Text>Total Expenses</Text>
-          </View>
-          <View style={styles.card}>
-            <Text>Savings Rate</Text>
-          </View>
+        <View>
+          <Card
+            title="Total Balance"
+            value="0.00"
+            description="some short message"
+            cardIconName="wallet-outline"
+            cardIconColor="blue"
+          />
+          <Card
+            title="Total Income"
+            value="0.00"
+            description="some short message"
+            cardIconName="trending-up"
+            cardIconColor="green"
+          />
+          <Card
+            title="Total Expenses"
+            value="0.00"
+            description="some short message"
+            cardIconName="trending-down"
+            isRateDown
+            cardIconColor="red"
+          />
+          <Card
+            title="Savings Rate"
+            value="0.00"
+            description="some short message"
+            cardIconName="cash-outline"
+            cardIconColor="purple"
+          />
         </View>
 
         {/* Charts */}
