@@ -3,28 +3,42 @@ import { View, Text, StyleSheet } from "react-native";
 
 type CardProps = {
   title: string;
-  value: string;
-  description: string;
+  value: number;
+  savings?: boolean; // Determines whether the card will be for savings or not
+  description?: string; // The savings card doesn't has a description
   cardIconName: keyof typeof Ionicons.glyphMap;
-  isRateDown?: boolean;
-  cardIconColor: string;
+  isRateDown?: boolean; // Determines the cards rating arrow and color
+  cardIconColor: string; // A card icon color if the default black isn't appropriate
 };
 
 export function Card({
   title,
   value,
+  savings,
   description,
   cardIconName,
-  isRateDown = false, // Colors the description in RED if the rate is lower
+  isRateDown,
   cardIconColor,
 }: CardProps) {
+  const currency = "$"; // [ ] TODO: Globalize currency based on user choice, with Context for example
+
   return (
     <View style={styles.card}>
       <View>
         <Text style={styles.cardTitle}>{title}</Text>
-        <Text style={styles.cardValue}>{value}</Text>
-        <Text style={[styles.cardDescription, isRateDown && { color: "red" }]}>
-          {description}
+        <Text style={styles.cardValue}>
+          {savings ? `${value.toFixed(1)}%` : `${currency}${value.toFixed(2)}`}
+        </Text>
+        <Text
+          style={[
+            styles.cardDescription,
+            (isRateDown && { color: "red" }) || { color: "green" },
+          ]}
+        >
+          {description && (
+            <Ionicons name={isRateDown ? "arrow-down" : "arrow-up"} />
+          )}
+          {description || ""}
         </Text>
       </View>
       <Ionicons
