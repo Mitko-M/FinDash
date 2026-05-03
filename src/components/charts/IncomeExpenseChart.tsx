@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text } from "react-native";
 import { BarChart } from "react-native-gifted-charts";
 
+// [ ] TODO: Add data prop with default value in case of no transactions
 export function IncomeExpenseChart() {
   const barWidth = 20;
   const groupSpacing = 2;
@@ -77,7 +78,8 @@ export function IncomeExpenseChart() {
   const height = 300;
 
   return (
-    <View style={{ alignItems: "center", padding: 16 }}>
+    //? MARK: The bar chart's labels are too in the left.
+    <View style={{ alignItems: "center", padding: 16, marginLeft: 16 }}>
       <BarChart
         width={width}
         height={height}
