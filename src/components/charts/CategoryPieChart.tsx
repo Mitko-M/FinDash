@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { View, Text, ScrollView } from "react-native";
 import { PieChart } from "react-native-gifted-charts";
 
@@ -8,7 +8,6 @@ type PieItem = {
   gradientCenterColor: string;
   text: string;
   percent: number;
-  focused?: boolean;
 };
 
 export function CategoryPieChart({
@@ -32,25 +31,35 @@ export function CategoryPieChart({
 }) {
   const total = rawData.reduce((sum, item) => sum + item.amount, 0);
 
-  const data: PieItem[] = rawData.map((item) => {
-    const percent = Math.round((item.amount / total) * 100);
-    return {
-      value: item.amount,
-      color: item.color,
-      gradientCenterColor: item.gradient,
-      text: item.text,
-      percent,
-      focused: false,
-    };
-  });
+  const data: PieItem[] = useMemo(() => {
+    return rawData.map((item) => {
+      const percent = Math.round((item.amount / total) * 100);
+      return {
+        value: item.amount,
+        color: item.color,
+        gradientCenterColor: item.gradient,
+        text: item.text,
+        percent,
+      };
+    });
+  }, [rawData, total]);
 
-  const biggest = data.reduce(
-    (max, item) => (item.value > max.value ? item : max),
-    data[0],
-  );
-  biggest.focused = true;
+  const biggest = useMemo(() => {
+    return data.reduce(
+      (max, item) => (item.value > max.value ? item : max),
+      data[0],
+    );
+  }, [data]);
 
   const [focused, setFocused] = useState<PieItem>(biggest);
+
+  function handlePress(item: PieItem) {
+    if (item.text === focused.text) {
+      setFocused(biggest);
+    } else {
+      setFocused(item);
+    }
+  }
 
   const renderDot = (color: string) => (
     <View
@@ -64,14 +73,6 @@ export function CategoryPieChart({
     />
   );
 
-  function handlePress(item: PieItem) {
-    if (focused && item.text === focused.text) {
-      setFocused(biggest);
-    } else {
-      setFocused(item);
-    }
-  }
-
   return (
     <View style={{ alignItems: "center", padding: 16 }}>
       <PieChart
@@ -84,28 +85,24 @@ export function CategoryPieChart({
         innerCircleColor={"#fff"}
         focusOnPress
         onPress={(item: PieItem) => handlePress(item)}
-        centerLabelComponent={() => {
-          return (
-            <View style={{ justifyContent: "center", alignItems: "center" }}>
-              <Text
-                style={{
-                  fontSize: 26,
-                  fontWeight: "700",
-                  color: focused.color,
-                }}
-              >
-                {focused.value.toFixed(2)}$
-              </Text>
-              <Text style={{ fontSize: 15, color: "black" }}>
-                {focused.text}
-              </Text>
-            </View>
-          );
-        }}
+        centerLabelComponent={() => (
+          <View style={{ justifyContent: "center", alignItems: "center" }}>
+            <Text
+              style={{
+                fontSize: 26,
+                fontWeight: "700",
+                color: focused.color,
+              }}
+            >
+              {focused.value.toFixed(2)}$
+            </Text>
+            <Text style={{ fontSize: 15, color: "black" }}>{focused.text}</Text>
+          </View>
+        )}
         showText={false}
       />
 
-      <View style={{ width: "100%", position: "relative", marginTop: 24 }}>
+      <View style={{ width: "100%", marginTop: 24 }}>
         <ScrollView
           horizontal
           style={{ maxHeight: 80 }}
