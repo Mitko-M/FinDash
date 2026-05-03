@@ -21,6 +21,7 @@ export function IncomeExpenseChart() {
     );
   };
 
+  // MARK: Demo data will delete later when the add-transaction page is finished
   const data = [
     {
       labelComponent: () => renderCenteredLabel("Nov"),
@@ -94,6 +95,34 @@ export function IncomeExpenseChart() {
         xAxisLabelTextStyle={{ textAlign: "center" }}
         onPress={() => {}} // Show a modal with expense and income
       />
+      {/* Legend */}
+      <View style={{ flexDirection: "row", marginTop: 12, gap: 24 }}>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <View
+            style={{
+              width: 12,
+              height: 12,
+              backgroundColor: "#4CAF50",
+              borderRadius: 2,
+              marginRight: 6,
+            }}
+          />
+          <Text style={{ fontSize: 14, color: "#4CAF50" }}>Income</Text>
+        </View>
+
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <View
+            style={{
+              width: 12,
+              height: 12,
+              backgroundColor: "#F44336",
+              borderRadius: 2,
+              marginRight: 6,
+            }}
+          />
+          <Text style={{ fontSize: 14, color: "#F44336" }}>Expense</Text>
+        </View>
+      </View>
     </View>
   );
 }
