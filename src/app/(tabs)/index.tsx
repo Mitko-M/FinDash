@@ -1,6 +1,7 @@
 import { View, Text, ScrollView, StyleSheet, Pressable } from "react-native";
 import { Card } from "@/src/components/ui/Card";
 import { IncomeExpenseChart } from "@/src/components/charts/IncomeExpenseChart";
+import { CategoryPieChart } from "@/src/components/charts/CategoryPieChart";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -53,10 +54,14 @@ export default function HomeScreen() {
         </View>
 
         {/* Charts */}
-        <IncomeExpenseChart />
+        <View style={styles.chartContainer}>
+          <Text style={{ fontWeight: "bold" }}>Income vs Expenses</Text>
+          <IncomeExpenseChart />
+        </View>
 
-        <View style={styles.chartPlaceholder}>
-          <Text>Category Pie Chart</Text>
+        <View style={styles.chartContainer}>
+          <Text style={{ fontWeight: "bold" }}>Spending by Category</Text>
+          <CategoryPieChart />
         </View>
 
         {/* Recent Transactions */}
@@ -79,21 +84,17 @@ const styles = StyleSheet.create({
   container: { padding: 16 },
   title: { fontSize: 28, fontWeight: "700", marginBottom: 16 },
   summaryRow: { flexDirection: "row", gap: 12, marginBottom: 12 },
-  card: {
-    flex: 1,
-    height: 100,
-    backgroundColor: "#eee",
-    borderRadius: 12,
-    justifyContent: "center",
+  chartContainer: {
+    flexDirection: "column",
+    justifyContent: "space-between",
     alignItems: "center",
-  },
-  chartPlaceholder: {
-    height: 200,
-    backgroundColor: "#ddd",
+    padding: 16,
+    borderWidth: 0.5,
+    borderColor: "gray",
     borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 16,
+    backgroundColor: "#fff",
+    marginBottom: 12,
+    overflow: "hidden",
   },
   sectionTitle: { fontSize: 20, fontWeight: "600", marginBottom: 8 },
   transactionPlaceholder: {
