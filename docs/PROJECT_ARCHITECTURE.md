@@ -11,8 +11,6 @@ FinDash is a finance tracker built as an Expo app with React Native and `expo-ro
 - Shared business logic and utilities in `src/hooks` and `src/utils`
 - Domain types in `src/types`
 
-The project also contains an `app-example` folder with starter app scaffolding, while the actual application implementation lives under `src/`.
-
 ---
 
 ## Core Architecture
