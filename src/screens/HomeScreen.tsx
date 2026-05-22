@@ -4,6 +4,7 @@ import { IncomeExpenseChart } from "@/src/components/charts/IncomeExpenseChart";
 import { CategoryPieChart } from "@/src/components/charts/CategoryPieChart";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { TransactionList } from "../components/transactions/TransactionList";
 
 export default function HomeScreen() {
   //? MARK: Later this needs to be user inputted
@@ -65,7 +66,9 @@ export default function HomeScreen() {
         </View>
 
         {/* Recent Transactions */}
-        <View style={{}}></View>
+        <View style={styles.recentTransactionsContainer}>
+          <TransactionList />
+        </View>
       </ScrollView>
       <Pressable
         style={styles.fab}
@@ -78,8 +81,23 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 16 },
+  // This padding bottoms is so the add-transaction button doesn't cover the demo transaction - will be removed later
+  container: { padding: 16, paddingBottom: 60 },
   title: { fontSize: 28, fontWeight: "700", marginBottom: 16 },
+  recentTransactionsContainer: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 16,
+    borderWidth: 0.5,
+    borderColor: "gray",
+    borderRadius: 12,
+    backgroundColor: "#fff",
+    marginBottom: 12,
+    gap: 4,
+    overflowY: "scroll",
+  },
   chartContainer: {
     flexDirection: "column",
     justifyContent: "space-between",
