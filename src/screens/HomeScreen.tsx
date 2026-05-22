@@ -65,10 +65,7 @@ export default function HomeScreen() {
         </View>
 
         {/* Recent Transactions */}
-        <Text style={styles.sectionTitle}>Recent Transactions</Text>
-        <View style={styles.transactionPlaceholder}>
-          <Text>Transaction Item</Text>
-        </View>
+        <View style={{}}></View>
       </ScrollView>
       <Pressable
         style={styles.fab}
@@ -83,7 +80,6 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: { padding: 16 },
   title: { fontSize: 28, fontWeight: "700", marginBottom: 16 },
-  summaryRow: { flexDirection: "row", gap: 12, marginBottom: 12 },
   chartContainer: {
     flexDirection: "column",
     justifyContent: "space-between",
@@ -95,14 +91,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     marginBottom: 12,
     overflow: "hidden",
-  },
-  sectionTitle: { fontSize: 20, fontWeight: "600", marginBottom: 8 },
-  transactionPlaceholder: {
-    height: 60,
-    backgroundColor: "#eee",
-    borderRadius: 12,
-    justifyContent: "center",
-    paddingHorizontal: 16,
   },
   fab: {
     position: "absolute",
