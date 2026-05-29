@@ -1,9 +1,18 @@
 import * as SQLite from "expo-sqlite";
 import { TransactionDb } from "@/src/types/Transaction";
 
-const db = await SQLite.openDatabaseAsync("findex.db");
+let dbPromise: Promise<SQLite.SQLiteDatabase>;
+
+function getDb() {
+  if (!dbPromise) {
+    dbPromise = SQLite.openDatabaseAsync("findex.db");
+  }
+  return dbPromise;
+}
 
 export async function initDB() {
+  const db = await getDb();
+
   await db.execAsync(`
     CREATE TABLE IF NOT EXISTS transactions (
       id TEXT PRIMARY KEY,
@@ -17,6 +26,8 @@ export async function initDB() {
 }
 
 export async function addTransaction(tx: TransactionDb) {
+  const db = await getDb();
+
   await db.runAsync(
     `INSERT INTO transactions (id, type, category, amount, description, date)
      VALUES (?, ?, ?, ?, ?, ?);`,
@@ -25,9 +36,13 @@ export async function addTransaction(tx: TransactionDb) {
 }
 
 export async function getTransactions(): Promise<TransactionDb[]> {
+  const db = await getDb();
+
   return await db.getAllAsync("SELECT * FROM transactions ORDER BY date DESC;");
 }
 
 export async function deleteTransaction(id: string) {
+  const db = await getDb();
+
   await db.runAsync("DELETE FROM transactions WHERE id = ?;", [id]);
 }
