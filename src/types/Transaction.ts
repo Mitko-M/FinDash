@@ -7,4 +7,5 @@ export type TransactionType = {
   amount: number;
   description: string;
   date: Date;
+  color?: string;
 };

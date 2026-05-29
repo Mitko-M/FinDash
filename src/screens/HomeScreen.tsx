@@ -4,7 +4,9 @@ import { IncomeExpenseChart } from "@/src/components/charts/IncomeExpenseChart";
 import { CategoryPieChart } from "@/src/components/charts/CategoryPieChart";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { TransactionList } from "../components/transactions/TransactionList";
+import { TransactionList } from "@/src/components/transactions/TransactionList";
+import { TransactionType } from "@/src/types/Transaction";
+import { Categories } from "@/src/services/categories";
 
 export default function HomeScreen() {
   //? MARK: Later this needs to be user inputted
@@ -15,6 +17,19 @@ export default function HomeScreen() {
 
   const totalBalance = totalIncome - totalExpenses;
   const savingsRate = totalBalance / (totalIncome / 100);
+
+  //? MARK: Later this will be pulled from local storage
+  const transactions: TransactionType[] = [
+    {
+      iconName: Categories["HealthCare"].icon,
+      type: "Expense",
+      category: "HealthCare",
+      amount: 50,
+      description: "Pharmacy",
+      date: new Date(),
+      color: Categories["HealthCare"].color, // The default color could be #444
+    },
+  ];
 
   return (
     <View style={{ flex: 1 }}>
@@ -67,7 +82,7 @@ export default function HomeScreen() {
 
         {/* Recent Transactions */}
         <View style={styles.recentTransactionsContainer}>
-          <TransactionList />
+          <TransactionList transactionItems={transactions} />
         </View>
       </ScrollView>
       <Pressable

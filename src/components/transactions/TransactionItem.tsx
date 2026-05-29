@@ -34,7 +34,7 @@ export function TransactionItem({ item }: TransactionItemProps) {
             alignItems: "center",
           }}
         >
-          <Ionicons name={item.iconName} size={24} color="#444" />
+          <Ionicons name={item.iconName} size={24} color={item.color} />
         </View>
 
         <View style={{ flexDirection: "column" }}>

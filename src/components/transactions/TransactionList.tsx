@@ -6,18 +6,7 @@ type TransactionListProps = {
   transactionItems: TransactionType[];
 };
 
-export function TransactionList({
-  transactionItems = [
-    {
-      iconName: "fitness",
-      type: "Expense",
-      category: "HealthCare",
-      amount: 50,
-      description: "Pharmacy",
-      date: new Date(),
-    },
-  ],
-}: TransactionListProps) {
+export function TransactionList({ transactionItems }: TransactionListProps) {
   return (
     <View>
       {transactionItems.map((item, i) => (
