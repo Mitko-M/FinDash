@@ -11,7 +11,10 @@ type DropdownInputProps = {
   data: DropdownElement[];
   defaultValue: string;
   label: string;
-  search?: boolean;
+  search?: boolean; // If it's not explicitly set to false it will display a search bar in the dropdown
+  value: string | null;
+  onChange: (value: string) => void;
+  disabled?: boolean;
 };
 
 export function DropdownInputField({
@@ -19,15 +22,21 @@ export function DropdownInputField({
   defaultValue,
   label,
   search = true,
+  value,
+  onChange,
+  disabled = false,
 }: DropdownInputProps) {
-  const [value, setValue] = useState(null);
   const [isFocus, setIsFocus] = useState(false);
 
   return (
-    <View style={{ marginBottom: 16 }}>
+    <View style={{ marginBottom: 16, opacity: disabled ? 0.5 : 1 }}>
       <Text style={styles.dropdownLabel}>{label}</Text>
       <Dropdown
-        style={[styles.dropdown, isFocus && { borderColor: "blue" }]}
+        style={[
+          styles.dropdown,
+          isFocus && { borderColor: "blue" },
+          disabled && styles.disabledDropdown,
+        ]}
         placeholderStyle={styles.placeholderStyle}
         selectedTextStyle={styles.selectedTextStyle}
         inputSearchStyle={styles.inputSearchStyle}
@@ -40,12 +49,13 @@ export function DropdownInputField({
         placeholder={!isFocus ? defaultValue : "..."}
         searchPlaceholder="Search..."
         value={value}
-        onFocus={() => setIsFocus(true)}
+        onFocus={() => !disabled && setIsFocus(true)}
         onBlur={() => setIsFocus(false)}
         onChange={(item) => {
-          setValue(item.value);
+          onChange(item.value);
           setIsFocus(false);
         }}
+        disable={disabled}
       />
     </View>
   );
@@ -63,6 +73,10 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     borderRadius: 8,
     paddingHorizontal: 8,
+  },
+  disabledDropdown: {
+    backgroundColor: "lightgray",
+    borderColor: "#ccc",
   },
   label: {
     position: "absolute",

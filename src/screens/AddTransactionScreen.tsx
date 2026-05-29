@@ -22,6 +22,10 @@ const transactionType = [
 
 export default function AddTransactionScreen() {
   const [date, setDate] = useState(new Date());
+  const [type, setType] = useState<string | null>(null);
+  const [category, setCategory] = useState<string | null>(null);
+
+  const isIncome = type === "2";
 
   return (
     <View style={styles.container}>
@@ -32,11 +36,16 @@ export default function AddTransactionScreen() {
         defaultValue="Expense/Income"
         label="Type"
         search={false}
+        value={type}
+        onChange={setType}
       />
       <DropdownInputField
         data={categoryData}
         defaultValue="Select a category"
         label="Category"
+        value={category}
+        onChange={setCategory}
+        disabled={isIncome}
       />
       <InputField placeHolder="0.00" label="Amount" />
       <InputField label="Description" placeHolder="Enter description" />
