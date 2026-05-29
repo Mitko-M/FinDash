@@ -13,7 +13,7 @@ type DropdownInputProps = {
   label: string;
   search?: boolean; // If it's not explicitly set to false it will display a search bar in the dropdown
   value: string | null;
-  onChange: (value: string) => void;
+  onChange: (item: DropdownElement) => void;
   disabled?: boolean;
 };
 
@@ -52,7 +52,7 @@ export function DropdownInputField({
         onFocus={() => !disabled && setIsFocus(true)}
         onBlur={() => setIsFocus(false)}
         onChange={(item) => {
-          onChange(item.value);
+          onChange(item);
           setIsFocus(false);
         }}
         disable={disabled}

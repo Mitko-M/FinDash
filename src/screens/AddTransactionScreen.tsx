@@ -2,22 +2,18 @@ import { View, Text, StyleSheet, Pressable } from "react-native";
 import { DropdownInputField } from "../components/ui/DropdownInputField";
 import { InputField } from "../components/ui/InputField";
 import { useState } from "react";
+import { Categories } from "../services/categories";
 import DateInputField from "../components/ui/DateInputField";
 
-const categoryData = [
-  { label: "Food & Dining", value: "1" },
-  { label: "Transport", value: "2" },
-  { label: "Shopping", value: "3" },
-  { label: "Bills & Utilities", value: "4" },
-  { label: "Entertainment", value: "5" },
-  { label: "HealthCare", value: "6" },
-  { label: "Education", value: "7" },
-  { label: "Other Expense", value: "8" },
-];
+const incomeCategoryData = [{ label: "Income", value: "Income" }];
+const expenseCategoryData = Object.entries(Categories).map(([key, cat]) => ({
+  label: cat.label,
+  value: key,
+}));
 
 const transactionType = [
-  { label: "Expense", value: "1" },
-  { label: "Income", value: "2" },
+  { label: "Expense", value: "Expense" },
+  { label: "Income", value: "Income" },
 ];
 
 export default function AddTransactionScreen() {
@@ -25,7 +21,9 @@ export default function AddTransactionScreen() {
   const [type, setType] = useState<string | null>(null);
   const [category, setCategory] = useState<string | null>(null);
 
-  const isIncome = type === "2";
+  const isIncome = type === "Income";
+
+  const categoryData = isIncome ? incomeCategoryData : expenseCategoryData;
 
   return (
     <View style={styles.container}>
@@ -37,14 +35,22 @@ export default function AddTransactionScreen() {
         label="Type"
         search={false}
         value={type}
-        onChange={setType}
+        onChange={(item) => {
+          setType(item.value);
+
+          if (item.label === "Income") {
+            setCategory("Income");
+          } else {
+            setCategory(null);
+          }
+        }}
       />
       <DropdownInputField
         data={categoryData}
         defaultValue="Select a category"
         label="Category"
         value={category}
-        onChange={setCategory}
+        onChange={(item) => setCategory(item.value)}
         disabled={isIncome}
       />
       <InputField placeHolder="0.00" label="Amount" />
