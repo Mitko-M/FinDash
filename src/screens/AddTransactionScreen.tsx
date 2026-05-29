@@ -58,7 +58,10 @@ export default function AddTransactionScreen() {
       <DateInputField value={date} label="Date" onChange={setDate} />
 
       <Pressable
-        style={styles.button}
+        style={({ pressed }) => [
+          styles.button,
+          pressed && { backgroundColor: "#296d2c" },
+        ]}
         onPress={() => console.log("Transaction added")}
       >
         <Text style={styles.buttonText}>Add Transaction</Text>
