@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 
+//UI displaying transaction
 export type TransactionType = {
   id: string;
   iconName: keyof typeof Ionicons.glyphMap;
@@ -11,9 +12,10 @@ export type TransactionType = {
   color?: string; // optional UI color
 };
 
+//DB saved transaction type
 export type TransactionDb = {
   id: string;
-  type: "Expense" | "Income";
+  type: string;
   category: string;
   amount: number;
   description: string;

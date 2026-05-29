@@ -1,9 +1,13 @@
 import { View, Text, StyleSheet, Pressable } from "react-native";
-import { DropdownInputField } from "../components/ui/DropdownInputField";
-import { InputField } from "../components/ui/InputField";
+import { DropdownInputField } from "@/src/components/ui/DropdownInputField";
+import { InputField } from "@/src/components/ui/InputField";
 import { useState } from "react";
-import { Categories } from "../services/categories";
-import DateInputField from "../components/ui/DateInputField";
+import { Categories } from "@/src/services/categories";
+import DateInputField from "@/src/components/ui/DateInputField";
+import { saveTransaction } from "@/src/services/transactions";
+import * as Crypto from "expo-crypto";
+
+const id = Crypto.randomUUID();
 
 const incomeCategoryData = [{ label: "Income", value: "Income" }];
 const expenseCategoryData = Object.entries(Categories).map(([key, cat]) => ({
@@ -20,6 +24,8 @@ export default function AddTransactionScreen() {
   const [date, setDate] = useState(new Date());
   const [type, setType] = useState<string | null>(null);
   const [category, setCategory] = useState<string | null>(null);
+  const [amount, setAmount] = useState("");
+  const [description, setDescription] = useState("");
 
   const isIncome = type === "Income";
 
@@ -53,8 +59,18 @@ export default function AddTransactionScreen() {
         onChange={(item) => setCategory(item.value)}
         disabled={isIncome}
       />
-      <InputField placeHolder="0.00" label="Amount" />
-      <InputField label="Description" placeHolder="Enter description" />
+      <InputField
+        placeHolder="0.00"
+        label="Amount"
+        value={amount}
+        onChangeText={setAmount}
+      />
+      <InputField
+        label="Description"
+        placeHolder="Enter description"
+        value={description}
+        onChangeText={setDescription}
+      />
       <DateInputField value={date} label="Date" onChange={setDate} />
 
       <Pressable
@@ -62,7 +78,24 @@ export default function AddTransactionScreen() {
           styles.button,
           pressed && { backgroundColor: "#296d2c" },
         ]}
-        onPress={() => console.log("Transaction added")}
+        onPress={async () => {
+          if (!type || !category || !amount) {
+            alert("Missing fields!");
+            return;
+          }
+
+          const tx = {
+            id: id,
+            type,
+            category,
+            amount: Number(amount),
+            description,
+            date: date.toISOString(),
+          };
+
+          await saveTransaction(tx);
+          console.log(`Added: ${tx}`);
+        }}
       >
         <Text style={styles.buttonText}>Add Transaction</Text>
       </Pressable>

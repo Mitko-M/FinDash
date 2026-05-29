@@ -3,13 +3,25 @@ import { View, Text, TextInput, StyleSheet } from "react-native";
 type InputFieldProps = {
   placeHolder: string;
   label: string;
+  onChangeText: (text: string) => void;
+  value: string;
 };
 
-export function InputField({ placeHolder, label }: InputFieldProps) {
+export function InputField({
+  placeHolder,
+  label,
+  value,
+  onChangeText,
+}: InputFieldProps) {
   return (
     <View>
       <Text style={styles.label}>{label}</Text>
-      <TextInput placeholder={placeHolder} style={styles.input} />
+      <TextInput
+        placeholder={placeHolder}
+        style={styles.input}
+        value={value}
+        onChangeText={onChangeText}
+      />
     </View>
   );
 }
