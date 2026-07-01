@@ -30,14 +30,14 @@ export default function HomeScreen() {
     return transactionsFromDb
       .filter((t) => t.type === "Income")
       .map((t) => t.amount)
-      .reduce((sum, amount) => sum + amount);
+      .reduce((sum, amount) => sum + amount, 0);
   }, [transactionsFromDb]);
 
   const totalExpenses = useMemo(() => {
     return transactionsFromDb
       .filter((t) => t.type === "Expense")
       .map((t) => t.amount)
-      .reduce((sum, amount) => sum + amount);
+      .reduce((sum, amount) => sum + amount, 0);
   }, [transactionsFromDb]);
 
   const totalBalance = totalIncome - totalExpenses;
