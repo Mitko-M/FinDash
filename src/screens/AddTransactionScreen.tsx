@@ -8,8 +8,6 @@ import DateInputField from "@/src/components/ui/DateInputField";
 import { saveTransaction } from "@/src/services/transactions";
 import * as Crypto from "expo-crypto";
 
-const id = Crypto.randomUUID();
-
 const incomeCategoryData = [{ label: "Income", value: "Income" }];
 const expenseCategoryData = Object.entries(Categories).map(([key, cat]) => ({
   label: cat.label,
@@ -88,7 +86,7 @@ export default function AddTransactionScreen() {
           }
 
           const tx = {
-            id: id,
+            id: Crypto.randomUUID(),
             type,
             category,
             amount: Number(amount),
