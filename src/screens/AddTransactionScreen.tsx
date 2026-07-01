@@ -97,9 +97,8 @@ export default function AddTransactionScreen() {
           };
 
           await saveTransaction(tx);
-          // ! [ ] TODO: Remove later
-          console.log(`Added: ${JSON.stringify(tx)}`);
-          router.back();
+
+          router.navigate("/(tabs)");
         }}
       >
         <Text style={styles.buttonText}>Add Transaction</Text>
