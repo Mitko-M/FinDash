@@ -9,7 +9,7 @@ import { TransactionType } from "@/src/types/Transaction";
 import { Categories } from "@/src/services/categories";
 
 export default function HomeScreen() {
-  //? MARK: Later this needs to be user inputted
+  //? MARK: Later this needs to be calculated based on transactions
   //------------------------------
   const totalIncome = 5975;
   const totalExpenses = 670.5;
@@ -21,6 +21,7 @@ export default function HomeScreen() {
   //? MARK: Later this will be pulled from local storage
   const transactions: TransactionType[] = [
     {
+      id: "somekey",
       iconName: Categories["HealthCare"].icon,
       type: "Expense",
       category: "HealthCare",

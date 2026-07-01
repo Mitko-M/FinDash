@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, Pressable } from "react-native";
 import { DropdownInputField } from "@/src/components/ui/DropdownInputField";
 import { InputField } from "@/src/components/ui/InputField";
 import { useState } from "react";
+import { useRouter } from "expo-router";
 import { Categories } from "@/src/services/categories";
 import DateInputField from "@/src/components/ui/DateInputField";
 import { saveTransaction } from "@/src/services/transactions";
@@ -21,6 +22,8 @@ const transactionType = [
 ];
 
 export default function AddTransactionScreen() {
+  const router = useRouter();
+
   const [date, setDate] = useState(new Date());
   const [type, setType] = useState<string | null>(null);
   const [category, setCategory] = useState<string | null>(null);
@@ -94,7 +97,9 @@ export default function AddTransactionScreen() {
           };
 
           await saveTransaction(tx);
-          console.log(`Added: ${tx}`);
+          // ! [ ] TODO: Remove later
+          console.log(`Added: ${JSON.stringify(tx)}`);
+          router.back();
         }}
       >
         <Text style={styles.buttonText}>Add Transaction</Text>
