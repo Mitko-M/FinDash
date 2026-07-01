@@ -41,6 +41,8 @@ export default function HomeScreen() {
   }, [transactionsFromDb]);
 
   const totalBalance = totalIncome - totalExpenses;
+
+  // That's basically how much money you have left (balance) compared to the income in percentage
   const savingsRate = totalBalance / (totalIncome / 100);
 
   const transactions: TransactionType[] = transactionsFromDb
