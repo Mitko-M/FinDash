@@ -5,10 +5,26 @@ import { CategoryPieChart } from "@/src/components/charts/CategoryPieChart";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { TransactionList } from "@/src/components/transactions/TransactionList";
-import { TransactionType } from "@/src/types/Transaction";
+import { TransactionDb, TransactionType } from "@/src/types/Transaction";
 import { Categories } from "@/src/services/categories";
+import { getAllTransactions } from "@/src/services/transactions";
+import { useEffect, useState } from "react";
+import { CategoryType } from "@/src/types/Category";
 
 export default function HomeScreen() {
+  const [transactionsFromDb, setTransactionFromDb] = useState<TransactionDb[]>(
+    [],
+  );
+
+  useEffect(() => {
+    const getData = async () => {
+      const data = await getAllTransactions();
+      setTransactionFromDb(data);
+    };
+
+    getData();
+  }, []);
+
   //? MARK: Later this needs to be calculated based on transactions
   //------------------------------
   const totalIncome = 5975;
@@ -18,19 +34,20 @@ export default function HomeScreen() {
   const totalBalance = totalIncome - totalExpenses;
   const savingsRate = totalBalance / (totalIncome / 100);
 
-  //? MARK: Later this will be pulled from local storage
-  const transactions: TransactionType[] = [
-    {
-      id: "somekey",
-      iconName: Categories["HealthCare"].icon,
-      type: "Expense",
-      category: "HealthCare",
-      amount: 50,
-      description: "Pharmacy",
-      date: new Date(),
-      color: Categories["HealthCare"].color, // The default color could be #444
-    },
-  ];
+  const transactions: TransactionType[] = transactionsFromDb
+    .slice(0, 5)
+    .map((t) => {
+      return {
+        id: t.id,
+        iconName: Categories[t.category as CategoryType].icon,
+        type: t.type as "Expense" | "Income",
+        category: t.category,
+        amount: t.amount,
+        description: t.description,
+        date: new Date(t.date),
+        color: Categories[t.category as CategoryType].color,
+      };
+    });
 
   return (
     <View style={{ flex: 1 }}>
