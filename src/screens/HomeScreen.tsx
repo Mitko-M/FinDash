@@ -8,7 +8,7 @@ import { TransactionList } from "@/src/components/transactions/TransactionList";
 import { TransactionDb, TransactionType } from "@/src/types/Transaction";
 import { Categories } from "@/src/services/categories";
 import { getAllTransactions } from "@/src/services/transactions";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { CategoryType } from "@/src/types/Category";
 
 export default function HomeScreen() {
@@ -25,11 +25,20 @@ export default function HomeScreen() {
     getData();
   }, []);
 
-  //? MARK: Later this needs to be calculated based on transactions
-  //------------------------------
-  const totalIncome = 5975;
-  const totalExpenses = 670.5;
-  //------------------------------
+  // Calculating income and expenses
+  const totalIncome = useMemo(() => {
+    return transactionsFromDb
+      .filter((t) => t.type === "Income")
+      .map((t) => t.amount)
+      .reduce((sum, amount) => sum + amount);
+  }, [transactionsFromDb]);
+
+  const totalExpenses = useMemo(() => {
+    return transactionsFromDb
+      .filter((t) => t.type === "Expense")
+      .map((t) => t.amount)
+      .reduce((sum, amount) => sum + amount);
+  }, [transactionsFromDb]);
 
   const totalBalance = totalIncome - totalExpenses;
   const savingsRate = totalBalance / (totalIncome / 100);
@@ -59,7 +68,7 @@ export default function HomeScreen() {
           <Card
             title="Total Balance"
             value={totalBalance}
-            description="12.5% from last month"
+            description="12.5% from last month" // TODO: Create a separate function calculating this
             cardIconName="wallet-outline"
             cardIconColor="blue"
           />
