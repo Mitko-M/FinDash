@@ -6,4 +6,5 @@ export type CategoryType =
   | "Entertainment"
   | "HealthCare"
   | "Education"
-  | "Other";
+  | "Other"
+  | "Income";

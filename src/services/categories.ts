@@ -21,4 +21,5 @@ export const Categories: Record<
     icon: "ellipsis-horizontal",
     color: "#BDBDBD",
   },
+  Income: { label: "Income", icon: "cash", color: "#90EE90" },
 };
