@@ -15,6 +15,7 @@ export function TransactionItem({ item }: TransactionItemProps) {
     <Pressable
       style={({ pressed }) => ({
         backgroundColor: pressed ? "#F0F1F3" : "#F9FAFB",
+        marginBottom: 10,
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
