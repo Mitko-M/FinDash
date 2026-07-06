@@ -1,50 +1,133 @@
-# Welcome to your Expo app 👋
+# FinDash
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A cross-platform personal finance tracker built with **Expo** and **React Native**. Record income and expenses, view your balance at a glance, and explore spending patterns through charts.
 
-## Get started
+Runs on **iOS**, **Android**, and **web** from a single codebase.
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## Features
 
-2. Start the app
+| Feature | Status |
+|---------|--------|
+| Add income & expense transactions | Done |
+| Home dashboard with balance summary | Done |
+| Recent transactions list | Done |
+| Local SQLite persistence | Done |
+| Category icons and colors | Done |
+| Income vs expense bar chart | UI done (demo data) |
+| Spending by category pie chart | UI done (demo data) |
+| Stats tab | Planned |
+| Settings (theme, currency) | Planned |
+| Edit / delete transactions | Planned |
 
-   ```bash
-   npx expo start
-   ```
+---
 
-In the output, you'll find options to open the app in a
+## Tech stack
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- [Expo SDK 54](https://docs.expo.dev/) + [expo-router](https://docs.expo.dev/router/introduction/) (file-based routing)
+- React Native 0.81, React 19
+- [expo-sqlite](https://docs.expo.dev/versions/latest/sdk/sqlite/) for local storage
+- [react-native-gifted-charts](https://github.com/Abhinandan-Kushwaha/react-native-gifted-charts) for visualizations
+- TypeScript (strict)
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+---
 
-## Get a fresh project
+## Quick start
 
-When you're ready, run:
+### Prerequisites
+
+Node.js 18+ and npm.
+
+### Install and run
 
 ```bash
-npm run reset-project
+npm install
+npx expo start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Then choose your target from the Expo dev tools:
 
-## Learn more
+- **Android** — press `a` or run `npm run android`
+- **iOS** — press `i` or run `npm run ios` (macOS + Xcode required)
+- **Web** — press `w` or run `npm run web`
+- **Device** — scan the QR code with [Expo Go](https://expo.dev/go)
 
-To learn more about developing your project with Expo, look at the following resources:
+### Lint
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+npm run lint
+```
 
-## Join the community
+---
 
-Join our community of developers creating universal apps.
+## Project structure
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```
+src/
+├── app/           # Routes (expo-router)
+├── screens/       # Screen implementations
+├── components/    # UI, charts, transaction list
+├── services/      # Data access (SQLite + facades)
+├── context/       # React context (planned)
+├── hooks/         # Custom hooks (planned)
+├── types/         # Domain types
+└── utils/         # Formatting and stats helpers
+```
+
+Routes stay thin; screens hold the feature logic. See the full breakdown in [docs/PROJECT_ARCHITECTURE.md](docs/PROJECT_ARCHITECTURE.md).
+
+---
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Project Architecture](docs/PROJECT_ARCHITECTURE.md) | Layers, routing, data flow, implementation status |
+| [Data Model](docs/DATA_MODEL.md) | SQLite schema, types, categories |
+| [Development Guide](docs/DEVELOPMENT.md) | Setup, conventions, troubleshooting |
+
+---
+
+## Architecture at a glance
+
+```
+┌─────────────────────────────────────────────┐
+│  src/app          expo-router routes        │
+├─────────────────────────────────────────────┤
+│  src/screens      Home, Add Transaction, …  │
+├─────────────────────────────────────────────┤
+│  src/components   UI · Charts · Transactions│
+├─────────────────────────────────────────────┤
+│  src/services     transactions · categories │
+├─────────────────────────────────────────────┤
+│  expo-sqlite      findex.db (local)         │
+└─────────────────────────────────────────────┘
+```
+
+Screens currently fetch data directly from the service layer. Context providers and hooks are scaffolded for future shared state.
+
+---
+
+## Screenshots / demo flow
+
+1. **Home** — summary cards (balance, income, expenses, savings rate), charts, last 5 transactions
+2. **Add Transaction** — type, category, amount, description, date → saved to SQLite
+3. **Stats / Settings** — placeholders (coming soon)
+
+---
+
+## Configuration
+
+App metadata and plugins are in `app.json`:
+
+- App name: **FinDash**
+- URL scheme: `findash`
+- Plugins: `expo-router`, `expo-splash-screen`, `expo-sqlite`
+- Typed routes and React Compiler enabled
+
+---
+
+## License
+
+Private project.
