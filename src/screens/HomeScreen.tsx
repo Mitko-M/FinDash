@@ -101,7 +101,7 @@ export default function HomeScreen() {
         {/* Charts */}
         <View style={styles.chartContainer}>
           <Text style={{ fontWeight: "bold" }}>Income vs Expenses</Text>
-          <IncomeExpenseChart />
+          <IncomeExpenseChart data={transactionsFromDb} />
         </View>
 
         <View style={styles.chartContainer}>
