@@ -1,6 +1,20 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { View, Text, ScrollView } from "react-native";
 import { PieChart } from "react-native-gifted-charts";
+import { TransactionDb } from "@/src/types/Transaction";
+import { CategoryType } from "@/src/types/Category";
+import { Categories } from "@/src/services/categories";
+
+const allCategories: CategoryType[] = [
+  "Bills",
+  "Education",
+  "Entertainment",
+  "Food",
+  "HealthCare",
+  "Other",
+  "Shopping",
+  "Transport",
+];
 
 type PieItem = {
   value: number;
@@ -10,50 +24,61 @@ type PieItem = {
   percent: number;
 };
 
-export function CategoryPieChart({
-  rawData = [
-    { text: "Shopping", amount: 340.5, color: "#4CAF50", gradient: "#2E7D32" },
-    { text: "Utilities", amount: 180.0, color: "#2196F3", gradient: "#1565C0" },
-    { text: "Transport", amount: 70.0, color: "#FF9800", gradient: "#EF6C00" },
-    {
-      text: "Entertainment",
-      amount: 65.0,
-      color: "#9C27B0",
-      gradient: "#6A0080",
-    },
-    {
-      text: "Food & Dining",
-      amount: 150.5,
-      color: "#F44336",
-      gradient: "#C62828",
-    },
-  ],
-}) {
-  const total = rawData.reduce((sum, item) => sum + item.amount, 0);
+type PieChartPropsType = {
+  rawData: TransactionDb[];
+};
 
+function prepareChartData(data: TransactionDb[]): PieItem[] {
+  const groupedByCat = allCategories.map((cat) => {
+    const filteredData = data.filter((t) => t.category === cat);
+
+    const text = Categories[cat].label;
+    const value = filteredData.reduce((sum, t) => sum + t.amount, 0);
+    const color = Categories[cat].color;
+    const gradientCenterColor = Categories[cat].gradient;
+
+    return {
+      value,
+      color,
+      gradientCenterColor,
+      text,
+    };
+  });
+
+  const total = groupedByCat.reduce((sum, t) => sum + t.value, 0);
+
+  const processedData = groupedByCat.map((t) => {
+    const percent = Math.round((t.value / total) * 100);
+    return {
+      ...t,
+      percent,
+    };
+  });
+
+  const filteredChartReadyData = processedData.filter((g) => g.percent > 0);
+  return filteredChartReadyData;
+}
+
+export function CategoryPieChart({ rawData = [] }: PieChartPropsType) {
   const data: PieItem[] = useMemo(() => {
-    return rawData.map((item) => {
-      const percent = Math.round((item.amount / total) * 100);
-      return {
-        value: item.amount,
-        color: item.color,
-        gradientCenterColor: item.gradient,
-        text: item.text,
-        percent,
-      };
-    });
-  }, [rawData, total]);
+    return prepareChartData(rawData);
+  }, [rawData]);
 
   const biggest = useMemo(() => {
-    return data.reduce(
-      (max, item) => (item.value > max.value ? item : max),
-      data[0],
-    );
+    if (!data.length) return null;
+    return [...data].sort((a, b) => b.value - a.value)[0];
   }, [data]);
 
-  const [focused, setFocused] = useState<PieItem>(biggest);
+  const [focused, setFocused] = useState<PieItem | null>(biggest);
+
+  useEffect(() => {
+    if (biggest) {
+      setFocused(biggest);
+    }
+  }, [biggest]);
 
   function handlePress(item: PieItem) {
+    if (!focused) return;
     if (item.text === focused.text) {
       setFocused(biggest);
     } else {
@@ -75,86 +100,98 @@ export function CategoryPieChart({
 
   return (
     <View style={{ alignItems: "center", padding: 16 }}>
-      <PieChart
-        data={data}
-        donut
-        showGradient
-        sectionAutoFocus
-        radius={120}
-        innerRadius={70}
-        innerCircleColor={"#fff"}
-        focusOnPress
-        onPress={(item: PieItem) => handlePress(item)}
-        centerLabelComponent={() => (
-          <View style={{ justifyContent: "center", alignItems: "center" }}>
-            <Text
-              style={{
-                fontSize: 26,
-                fontWeight: "700",
-                color: focused.color,
+      {data.length ? (
+        <>
+          <PieChart
+            data={data}
+            donut
+            showGradient
+            sectionAutoFocus
+            radius={120}
+            innerRadius={70}
+            innerCircleColor={"#fff"}
+            focusOnPress
+            onPress={(item: PieItem) => handlePress(item)}
+            centerLabelComponent={() =>
+              focused ? (
+                <View
+                  style={{ justifyContent: "center", alignItems: "center" }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 26,
+                      fontWeight: "700",
+                      color: focused?.color,
+                    }}
+                  >
+                    {focused?.value.toFixed(2)}$
+                  </Text>
+                  <Text style={{ fontSize: 15, color: "black" }}>
+                    {focused?.text}
+                  </Text>
+                </View>
+              ) : null
+            }
+            showText={false}
+          />
+          <View style={{ width: "100%", marginTop: 24 }}>
+            <ScrollView
+              horizontal
+              style={{ maxHeight: 80 }}
+              contentContainerStyle={{
+                flexDirection: "column",
+                justifyContent: "center",
               }}
+              showsHorizontalScrollIndicator={true}
             >
-              {focused.value.toFixed(2)}$
-            </Text>
-            <Text style={{ fontSize: 15, color: "black" }}>{focused.text}</Text>
-          </View>
-        )}
-        showText={false}
-      />
+              <View style={{ flexDirection: "row", marginBottom: 8 }}>
+                {data.map((item, index) =>
+                  index % 2 === 0 ? (
+                    <View
+                      key={item.text}
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        width: 140,
+                        paddingRight: 12,
+                      }}
+                    >
+                      {renderDot(item.color)}
+                      <Text style={{ fontSize: 13, color: "#333" }}>
+                        {item.text} {item.percent}%
+                      </Text>
+                    </View>
+                  ) : null,
+                )}
+              </View>
 
-      <View style={{ width: "100%", marginTop: 24 }}>
-        <ScrollView
-          horizontal
-          style={{ maxHeight: 80 }}
-          contentContainerStyle={{
-            flexDirection: "column",
-            justifyContent: "center",
-          }}
-          showsHorizontalScrollIndicator={true}
-        >
-          <View style={{ flexDirection: "row", marginBottom: 8 }}>
-            {data.map((item, index) =>
-              index % 2 === 0 ? (
-                <View
-                  key={item.text}
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    width: 140,
-                    paddingRight: 12,
-                  }}
-                >
-                  {renderDot(item.color)}
-                  <Text style={{ fontSize: 13, color: "#333" }}>
-                    {item.text} {item.percent}%
-                  </Text>
-                </View>
-              ) : null,
-            )}
+              <View style={{ flexDirection: "row" }}>
+                {data.map((item, index) =>
+                  index % 2 === 1 ? (
+                    <View
+                      key={item.text}
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        width: 140,
+                        paddingRight: 12,
+                      }}
+                    >
+                      {renderDot(item.color)}
+                      <Text style={{ fontSize: 13, color: "#333" }}>
+                        {item.text} {item.percent}%
+                      </Text>
+                    </View>
+                  ) : null,
+                )}
+              </View>
+            </ScrollView>
           </View>
-
-          <View style={{ flexDirection: "row" }}>
-            {data.map((item, index) =>
-              index % 2 === 1 ? (
-                <View
-                  key={item.text}
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    width: 140,
-                    paddingRight: 12,
-                  }}
-                >
-                  {renderDot(item.color)}
-                  <Text style={{ fontSize: 13, color: "#333" }}>
-                    {item.text} {item.percent}%
-                  </Text>
-                </View>
-              ) : null,
-            )}
-          </View>
-        </ScrollView>
-      </View>
+          )
+        </>
+      ) : (
+        <Text>There was no spending data!</Text>
+      )}
     </View>
   );
 }

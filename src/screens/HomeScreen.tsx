@@ -106,7 +106,7 @@ export default function HomeScreen() {
 
         <View style={styles.chartContainer}>
           <Text style={{ fontWeight: "bold" }}>Spending by Category</Text>
-          <CategoryPieChart />
+          <CategoryPieChart rawData={transactionsFromDb} />
         </View>
 
         {/* Recent Transactions */}
