@@ -1,17 +1,10 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { View, Text, ScrollView } from "react-native";
+import { View, Text } from "react-native";
 import { PieChart } from "react-native-gifted-charts";
 import { TransactionDb } from "@/src/types/Transaction";
 import { Categories } from "@/src/services/categories";
-import { CategoryType } from "@/src/types/Category";
-
-type CategorySlice = {
-  value: number;
-  color: string;
-  gradientCenterColor: string;
-  label: string;
-  percent: number;
-};
+import { CategoryType, CategorySlice } from "@/src/types/Category";
+import { CategoryLegend } from "./CategoryLegend";
 
 type Props = {
   transactions: TransactionDb[];
@@ -63,32 +56,6 @@ export function CategoryPieChart({ transactions = [] }: Props) {
     setActiveSlice(slice.label === activeSlice.label ? largestSlice : slice);
   }
 
-  const renderLegendItem = (slice: CategorySlice) => (
-    <View
-      key={slice.label}
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        width: 140,
-        paddingRight: 12,
-        marginBottom: 8,
-      }}
-    >
-      <View
-        style={{
-          height: 10,
-          width: 10,
-          borderRadius: 5,
-          backgroundColor: slice.color,
-          marginRight: 8,
-        }}
-      />
-      <Text style={{ fontSize: 13, color: "#333" }}>
-        {slice.label} {slice.percent}%
-      </Text>
-    </View>
-  );
-
   return (
     <View style={{ alignItems: "center", padding: 16 }}>
       {data.length ? (
@@ -126,18 +93,7 @@ export function CategoryPieChart({ transactions = [] }: Props) {
             showText={false}
           />
 
-          <View style={{ width: "100%", marginTop: 24 }}>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={true}
-              contentContainerStyle={{
-                flexDirection: "row",
-                flexWrap: "wrap",
-              }}
-            >
-              {data.map(renderLegendItem)}
-            </ScrollView>
-          </View>
+          <CategoryLegend slices={data} />
         </>
       ) : (
         <Text>There was no spending data!</Text>
