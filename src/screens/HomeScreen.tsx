@@ -1,7 +1,7 @@
 import { View, Text, ScrollView, StyleSheet, Pressable } from "react-native";
 import { Card } from "@/src/components/ui/Card";
-import { IncomeExpenseChart } from "@/src/components/charts/IncomeExpenseChart";
-import { CategoryPieChart } from "@/src/components/charts/CategoryPieChart";
+import { IncomeExpenseChart } from "@/src/components/charts/IncomeExpense/IncomeExpenseChart";
+import { CategoryPieChart } from "@/src/components/charts/CategorySpending/CategoryPieChart";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { TransactionList } from "@/src/components/transactions/TransactionList";
@@ -106,7 +106,7 @@ export default function HomeScreen() {
 
         <View style={styles.chartContainer}>
           <Text style={{ fontWeight: "bold" }}>Spending by Category</Text>
-          <CategoryPieChart rawData={transactionsFromDb} />
+          <CategoryPieChart transactions={transactionsFromDb} />
         </View>
 
         {/* Recent Transactions */}
