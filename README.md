@@ -15,8 +15,8 @@ Runs on **iOS**, **Android**, and **web** from a single codebase.
 | Recent transactions list | Done |
 | Local SQLite persistence | Done |
 | Category icons and colors | Done |
-| Income vs expense bar chart | UI done (demo data) |
-| Spending by category pie chart | UI done (demo data) |
+| Income vs expense bar chart | Done |
+| Spending by category pie chart | Done |
 | Stats tab | Planned |
 | Settings (theme, currency) | Planned |
 | Edit / delete transactions | Planned |
