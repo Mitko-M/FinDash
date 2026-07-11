@@ -1,35 +1,35 @@
 # FinDash
 
-A cross-platform personal finance tracker built with **Expo** and **React Native**. Record income and expenses, view your balance at a glance, and explore spending patterns through charts.
+FinDash is a cross-platform personal finance tracker built with Expo and React Native. It lets users record income and expense transactions, review a dashboard with summary cards and charts, and keep everything stored locally in SQLite.
 
-Runs on **iOS**, **Android**, and **web** from a single codebase.
+The app currently runs on iOS, Android, and web from a single codebase.
 
 ---
 
-## Features
+## Current status
 
-| Feature | Status |
-|---------|--------|
-| Add income & expense transactions | Done |
-| Home dashboard with balance summary | Done |
-| Recent transactions list | Done |
-| Local SQLite persistence | Done |
-| Category icons and colors | Done |
-| Income vs expense bar chart | Done |
-| Spending by category pie chart | Done |
-| Stats tab | Planned |
-| Settings (theme, currency) | Planned |
-| Edit / delete transactions | Planned |
+| Area                                | Status                                 |
+| ----------------------------------- | -------------------------------------- |
+| Add income and expense transactions | Implemented                            |
+| Home dashboard summary cards        | Implemented                            |
+| Recent transactions list            | Implemented                            |
+| Local SQLite persistence            | Implemented                            |
+| Category icons and colors           | Implemented                            |
+| Income vs expense chart             | Implemented with real transaction data |
+| Spending by category chart          | Implemented with real transaction data |
+| Stats tab                           | Present as a simple placeholder        |
+| Settings tab                        | Present as a simple placeholder        |
+| Edit and delete transaction flows   | Planned                                |
 
 ---
 
 ## Tech stack
 
-- [Expo SDK 54](https://docs.expo.dev/) + [expo-router](https://docs.expo.dev/router/introduction/) (file-based routing)
-- React Native 0.81, React 19
-- [expo-sqlite](https://docs.expo.dev/versions/latest/sdk/sqlite/) for local storage
-- [react-native-gifted-charts](https://github.com/Abhinandan-Kushwaha/react-native-gifted-charts) for visualizations
-- TypeScript (strict)
+- Expo SDK 57 with expo-router for file-based navigation
+- React Native 0.86 and React 19.2
+- expo-sqlite for local storage in a SQLite database named findex.db
+- react-native-gifted-charts for the income/expense and category charts
+- TypeScript in strict mode
 
 ---
 
@@ -37,7 +37,9 @@ Runs on **iOS**, **Android**, and **web** from a single codebase.
 
 ### Prerequisites
 
-Node.js 18+ and npm.
+- Node.js 18+
+- npm
+- Optional: Android Studio or Xcode for native emulation
 
 ### Install and run
 
@@ -46,12 +48,12 @@ npm install
 npx expo start
 ```
 
-Then choose your target from the Expo dev tools:
+Then choose a target from Expo Dev Tools:
 
-- **Android** — press `a` or run `npm run android`
-- **iOS** — press `i` or run `npm run ios` (macOS + Xcode required)
-- **Web** — press `w` or run `npm run web`
-- **Device** — scan the QR code with [Expo Go](https://expo.dev/go)
+- Android: `npm run android`
+- iOS: `npm run ios` (macOS + Xcode required)
+- Web: `npm run web`
+- Device: scan the QR code in Expo Go
 
 ### Lint
 
@@ -63,68 +65,49 @@ npm run lint
 
 ## Project structure
 
-```
+```text
 src/
-├── app/           # Routes (expo-router)
-├── screens/       # Screen implementations
-├── components/    # UI, charts, transaction list
-├── services/      # Data access (SQLite + facades)
-├── context/       # React context (planned)
-├── hooks/         # Custom hooks (planned)
-├── types/         # Domain types
-└── utils/         # Formatting and stats helpers
+├── app/           # expo-router entry points and layout files
+├── screens/       # Feature screens such as Home and Add Transaction
+├── components/    # UI, chart, and transaction list components
+├── services/      # SQLite access and transaction/category facades
+├── context/       # Context scaffolding (not wired up yet)
+├── hooks/         # Hook scaffolding (not wired up yet)
+├── types/         # Domain TypeScript models
+└── utils/         # Formatting and aggregation helpers
 ```
 
-Routes stay thin; screens hold the feature logic. See the full breakdown in [docs/PROJECT_ARCHITECTURE.md](docs/PROJECT_ARCHITECTURE.md).
+Routes stay thin; screens and services handle the app behavior. The current implementation uses direct service calls from screens rather than the context/hook layer yet.
+
+---
+
+## What the app does today
+
+1. Home shows balance, income, expenses, and savings-rate summary cards.
+2. The dashboard renders charts based on the actual transactions stored in SQLite.
+3. The Add Transaction screen creates new entries and navigates back to the home flow.
+4. Stats and Settings are available as lightweight placeholder screens.
 
 ---
 
 ## Documentation
 
-| Document | Description |
-|----------|-------------|
-| [Project Architecture](docs/PROJECT_ARCHITECTURE.md) | Layers, routing, data flow, implementation status |
-| [Data Model](docs/DATA_MODEL.md) | SQLite schema, types, categories |
-| [Development Guide](docs/DEVELOPMENT.md) | Setup, conventions, troubleshooting |
-
----
-
-## Architecture at a glance
-
-```
-┌─────────────────────────────────────────────┐
-│  src/app          expo-router routes        │
-├─────────────────────────────────────────────┤
-│  src/screens      Home, Add Transaction, …  │
-├─────────────────────────────────────────────┤
-│  src/components   UI · Charts · Transactions│
-├─────────────────────────────────────────────┤
-│  src/services     transactions · categories │
-├─────────────────────────────────────────────┤
-│  expo-sqlite      findex.db (local)         │
-└─────────────────────────────────────────────┘
-```
-
-Screens currently fetch data directly from the service layer. Context providers and hooks are scaffolded for future shared state.
-
----
-
-## Screenshots / demo flow
-
-1. **Home** — summary cards (balance, income, expenses, savings rate), charts, last 5 transactions
-2. **Add Transaction** — type, category, amount, description, date → saved to SQLite
-3. **Stats / Settings** — placeholders (coming soon)
+| Document                                                     | Description                                    |
+| ------------------------------------------------------------ | ---------------------------------------------- |
+| [docs/PROJECT_ARCHITECTURE.md](docs/PROJECT_ARCHITECTURE.md) | Architecture, routing, layers, and status      |
+| [docs/DATA_MODEL.md](docs/DATA_MODEL.md)                     | SQLite schema, types, and category definitions |
+| [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)                   | Local setup, conventions, and troubleshooting  |
 
 ---
 
 ## Configuration
 
-App metadata and plugins are in `app.json`:
+App metadata and Expo plugins are defined in app.json:
 
-- App name: **FinDash**
-- URL scheme: `findash`
-- Plugins: `expo-router`, `expo-splash-screen`, `expo-sqlite`
-- Typed routes and React Compiler enabled
+- App name: FinDash
+- Scheme: findash
+- Plugins: expo-router, expo-splash-screen, expo-sqlite, expo-font, expo-image, expo-status-bar, expo-web-browser
+- Typed routes and React Compiler are enabled
 
 ---
 

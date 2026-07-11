@@ -1,17 +1,15 @@
 # FinDash Development Guide
 
-Guide for setting up, running, and contributing to FinDash locally.
+This guide covers local setup, implementation notes, and the current workflow for working on FinDash.
 
 ---
 
 ## Prerequisites
 
-- **Node.js** 18+ (LTS recommended)
-- **npm** (comes with Node)
-- For native development:
-  - [Android Studio](https://docs.expo.dev/workflow/android-studio-emulator/) (Android emulator)
-  - [Xcode](https://docs.expo.dev/workflow/ios-simulator/) (iOS simulator, macOS only)
-- [Expo Go](https://expo.dev/go) on a physical device (optional, quickest way to preview)
+- Node.js 18+
+- npm
+- Optional: Android Studio for the Android emulator or Xcode for iOS simulation
+- Expo Go on a physical device for quick previews
 
 ---
 
@@ -29,24 +27,19 @@ npm install
 npx expo start
 ```
 
-From the Expo dev tools you can:
+From Expo Dev Tools you can:
 
-- Press `a` — open Android emulator
-- Press `i` — open iOS simulator
-- Press `w` — open in web browser
-- Scan QR code — open in Expo Go
+- Press `a` to open the Android emulator
+- Press `i` to open the iOS simulator
+- Press `w` to open the web preview
+- Scan the QR code in Expo Go
 
-### Platform-specific shortcuts
-
-```bash
-npm run android   # expo start --android
-npm run ios       # expo start --ios
-npm run web       # expo start --web
-```
-
-### 3. Lint
+### Useful scripts
 
 ```bash
+npm run android
+npm run ios
+npm run web
 npm run lint
 ```
 
@@ -54,30 +47,30 @@ npm run lint
 
 ## Project configuration
 
-| File | Purpose |
-|------|---------|
-| `app.json` | Expo app config: name, icons, plugins (expo-router, expo-sqlite, splash) |
-| `tsconfig.json` | TypeScript strict mode, `@/*` path alias |
-| `tsconfig.base.json` | Shared Expo TS compiler options |
-| `eslint.config.js` | ESLint with `eslint-config-expo` |
-| `expo-env.d.ts` | Generated Expo type references |
+| File               | Purpose                                     |
+| ------------------ | ------------------------------------------- |
+| app.json           | Expo app metadata, plugins, and experiments |
+| tsconfig.json      | TypeScript strict mode and path aliases     |
+| tsconfig.base.json | Shared Expo TypeScript settings             |
+| eslint.config.js   | Lint rules for the project                  |
+| expo-env.d.ts      | Expo-generated type references              |
 
 ### Path aliases
 
-Imports use the `@/` prefix mapped to the project root:
+The project uses the `@/` alias for imports, so code should follow patterns such as:
 
 ```typescript
 import HomeScreen from "@/src/screens/HomeScreen";
-import { TransactionDb } from "@/src/types/Transaction";
+import { saveTransaction } from "@/src/services/transactions";
 ```
 
 ### Expo experiments
 
-From `app.json`:
+The current app config enables:
 
-- **typedRoutes** — type-safe route params with expo-router
-- **reactCompiler** — React Compiler enabled
-- **newArchEnabled** — React Native New Architecture
+- typedRoutes
+- reactCompiler
+- New Architecture via `newArchEnabled`
 
 ---
 
@@ -85,123 +78,89 @@ From `app.json`:
 
 ### Adding a new screen
 
-1. Create the screen component in `src/screens/MyScreen.tsx`
-2. Add a route file in `src/app/` (or under `src/app/(tabs)/` for a tab)
-3. Wire navigation in the appropriate `_layout.tsx` if needed
-4. Update [PROJECT_ARCHITECTURE.md](./PROJECT_ARCHITECTURE.md) implementation status
+1. Create the screen under src/screens if it is a reusable feature screen.
+2. Add a route in src/app or src/app/(tabs) if it should be navigable.
+3. Keep navigation or layout wiring in the route files and leave business logic in the screen/service layers.
 
-Example tab route:
+### Adding or changing a transaction operation
 
-```typescript
-// src/app/(tabs)/my-tab.tsx
-import MyScreen from "@/src/screens/MyScreen";
-
-export default function MyTabRoute() {
-  return <MyScreen />;
-}
-```
-
-### Adding a database operation
-
-1. Add the SQL function in `src/services/db/transactions.ts`
-2. Expose it through the facade in `src/services/transactions.ts`
-3. Update [DATA_MODEL.md](./DATA_MODEL.md) with schema or operation changes
-
-Keep raw SQLite calls out of screens and components.
+1. Update the SQLite function in src/services/db/transactions.ts.
+2. Expose it through src/services/transactions.ts if screens should call it.
+3. Update the docs and types if the domain shape changes.
 
 ### Working with categories
 
-To add a category:
+To add or adjust a category:
 
-1. Add the key to the `CategoryType` union in `src/types/Category.ts`
-2. Add the entry to `Categories` in `src/services/categories.ts` (label, icon, color)
-3. The add-transaction dropdown will pick it up automatically
+1. Extend the union in src/types/Category.ts.
+2. Add the lookup entry in src/services/categories.ts.
+3. Ensure the Add Transaction form picks up the new value automatically.
 
 ### Platform-specific code
 
-Expo resolves platform files automatically:
+Expo resolves files such as these automatically:
 
-| File | Used on |
-|------|---------|
-| `Component.tsx` | All platforms (default) |
-| `Component.web.tsx` | Web only |
-| `Component.ios.tsx` | iOS only |
-| `Component.android.tsx` | Android only |
-
-CSS files (e.g. `home.web.css`) are imported only from web-specific components.
+| File                  | Used on       |
+| --------------------- | ------------- |
+| Component.tsx         | All platforms |
+| Component.web.tsx     | Web only      |
+| Component.ios.tsx     | iOS only      |
+| Component.android.tsx | Android only  |
 
 ---
 
-## Code conventions
+## Current architecture notes
 
-### Layer responsibilities
+The app currently follows a service-driven approach:
 
-| Layer | Should | Should not |
-|-------|--------|------------|
-| `src/app` | Define routes, navigation options | Contain business logic |
-| `src/screens` | Orchestrate data and layout | Execute raw SQL |
-| `src/components` | Present data via props | Fetch from database directly |
-| `src/services` | Data access and domain operations | Render UI |
-| `src/context` / `src/hooks` | Shared state and reusable logic | Define routes |
+- Screens call the service layer directly.
+- The service layer delegates to the SQLite database layer.
+- The context and hook directories exist as scaffolding but are not yet wired into the UI.
 
-### Type naming
-
-- `TransactionDb` — database/persistence shape
-- `TransactionType` — UI presentation shape
-- Suffix `Type` for unions/enums (`CategoryType`)
-
-### Styling
-
-- Native: React Native `StyleSheet`
-- Web overrides: `.web.tsx` components and `.web.css` where needed
-- Shared color tokens will eventually live in `ThemeContext` / `constants.ts`
+That is why the current implementation is straightforward and easy to follow, but it also means some stateful behavior is still duplicated across screens.
 
 ---
 
 ## Database notes
 
-- Database file: `findex.db`
-- Initialized on every app launch via `initDB()` in root `_layout.tsx`
-- Uses `CREATE TABLE IF NOT EXISTS` — safe to call repeatedly
-- To reset data during development: uninstall the app or clear app storage (platform-specific)
+- Database file: findex.db
+- Initialization happens in the root layout via initDB()
+- The app creates the transactions table with `CREATE TABLE IF NOT EXISTS`
+- To reset data during development, uninstall the app or clear app storage on the target platform
 
-SQLite is provided by `expo-sqlite` and works on iOS, Android, and web.
+SQLite is provided by expo-sqlite and works on iOS, Android, and web.
 
 ---
 
-## Known limitations (current codebase)
+## Current limitations
 
-- Charts on Home use **demo data**, not live transactions
-- Summary card trend text is **hardcoded** (not computed from history)
-- Stats and Settings tabs are **placeholders**
-- Context/hooks directories exist but are **empty** — screens call services directly
-- Web home (`index.web.tsx`) is a **separate mockup**, not shared with `HomeScreen`
-- No edit/delete transaction UI despite `deleteTransaction` existing in the DB layer
-- `TransactionList` uses array index as React key — should use `item.id`
-
-These are documented in [PROJECT_ARCHITECTURE.md](./PROJECT_ARCHITECTURE.md#implementation-status).
+- Summary card trend text is still hardcoded.
+- The Stats and Settings tabs are lightweight placeholder screens.
+- The Transaction Details screen is not implemented yet.
+- Edit and delete transaction flows are not exposed in the UI.
+- Context and hooks are present as scaffolding but are not yet active in the app state model.
 
 ---
 
 ## Troubleshooting
 
-### Metro bundler cache issues
+### Metro cache issues
 
 ```bash
 npx expo start --clear
 ```
 
-### Type errors after route changes
+### Route type issues
 
-Expo generates typed routes under `.expo/types/`. Restart the dev server if route types seem stale.
+If expo-router starts reporting stale types, restart the dev server and allow the generated route files to refresh.
 
 ### SQLite on web
 
-Ensure `expo-sqlite` is listed in `app.json` plugins. Web SQLite uses a WASM-backed implementation via Expo.
+Ensure expo-sqlite is present in app.json. Expo handles the web implementation through its SQLite plugin support.
 
-### Path alias not resolving
+### Path alias issues
 
-Verify `tsconfig.json` includes:
+Verify the tsconfig paths include:
 
 ```json
 "paths": {
@@ -209,15 +168,13 @@ Verify `tsconfig.json` includes:
 }
 ```
 
-Restart the TypeScript server in your editor if imports show errors.
-
 ---
 
 ## Documentation index
 
-| Document | Contents |
-|----------|----------|
-| [README.md](../README.md) | Overview and quick start |
-| [PROJECT_ARCHITECTURE.md](./PROJECT_ARCHITECTURE.md) | System design, layers, data flow |
-| [DATA_MODEL.md](./DATA_MODEL.md) | Schema, types, categories |
-| [DEVELOPMENT.md](./DEVELOPMENT.md) | This guide |
+| Document                                             | Contents                                |
+| ---------------------------------------------------- | --------------------------------------- |
+| [README.md](../README.md)                            | Overview and quick start                |
+| [PROJECT_ARCHITECTURE.md](./PROJECT_ARCHITECTURE.md) | System design and implementation status |
+| [DATA_MODEL.md](./DATA_MODEL.md)                     | Schema, types, and categories           |
+| [DEVELOPMENT.md](./DEVELOPMENT.md)                   | This guide                              |

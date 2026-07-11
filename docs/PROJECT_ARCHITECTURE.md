@@ -1,8 +1,8 @@
 # FinDash Project Architecture
 
-FinDash is a cross-platform personal finance tracker built with **Expo**, **React Native**, and **expo-router**. It lets users record income and expenses, view summary metrics on a dashboard, and (planned) explore trends through charts and settings.
+FinDash is a cross-platform personal finance tracker built with Expo, React Native, and expo-router. It currently supports transaction entry, a dashboard with summary cards and charts, and local persistence in SQLite.
 
-This document describes how the codebase is organized, how data flows through the app, and what is implemented versus planned.
+This document explains how the codebase is structured today and where the implementation still has room to grow.
 
 ---
 
@@ -14,28 +14,21 @@ This document describes how the codebase is organized, how data flows through th
 4. [Application layers](#application-layers)
 5. [Navigation and routing](#navigation-and-routing)
 6. [Data flow](#data-flow)
-7. [Cross-platform strategy](#cross-platform-strategy)
-8. [Implementation status](#implementation-status)
-9. [Conventions and design decisions](#conventions-and-design-decisions)
-10. [Related documentation](#related-documentation)
+7. [Implementation status](#implementation-status)
+8. [Related documentation](#related-documentation)
 
 ---
 
 ## High-level overview
 
-The app follows a **layered architecture** that separates routing, screens, UI components, business logic, and persistence:
+The app uses a layered structure with separate routing, screen, component, service, and persistence responsibilities:
 
 ```mermaid
 flowchart TB
     subgraph presentation [Presentation Layer]
-        Routes["src/app/* routes"]
+        Routes["src/app/*"]
         Screens["src/screens/*"]
         Components["src/components/*"]
-    end
-
-    subgraph state [State Layer - planned]
-        Context["src/context/*"]
-        Hooks["src/hooks/*"]
     end
 
     subgraph domain [Domain Layer]
@@ -53,64 +46,62 @@ flowchart TB
     Screens --> Services
     Screens --> Utils
     Services --> SQLite
-    Context -.-> Hooks
-    Hooks -.-> Services
 ```
 
-**Current reality:** Screens talk directly to the service layer. Context providers and custom hooks exist as scaffolding but are not yet wired up. See [Implementation status](#implementation-status).
+In the current build, screens call the service layer directly. The context and hook directories exist but are still scaffolding rather than a fully active state layer.
 
 ---
 
 ## Technology stack
 
-| Layer | Technology |
-|-------|------------|
-| Framework | Expo SDK 54, React Native 0.81, React 19 |
-| Navigation | expo-router 6 (file-based routing, typed routes) |
-| Database | expo-sqlite (local SQLite, `findex.db`) |
-| Charts | react-native-gifted-charts |
-| Icons | @expo/vector-icons (Ionicons) |
-| Forms / inputs | react-native-element-dropdown, @react-native-community/datetimepicker |
-| IDs | expo-crypto (`randomUUID`) |
-| Language | TypeScript (strict mode) |
-| Path aliases | `@/*` maps to project root |
+| Layer        | Technology                                                            |
+| ------------ | --------------------------------------------------------------------- |
+| Framework    | Expo SDK 57, React Native 0.86, React 19.2                            |
+| Navigation   | expo-router with file-based routes                                    |
+| Database     | expo-sqlite (local SQLite, findex.db)                                 |
+| Charts       | react-native-gifted-charts                                            |
+| Icons        | @expo/vector-icons                                                    |
+| Forms        | react-native-element-dropdown, @react-native-community/datetimepicker |
+| IDs          | expo-crypto (randomUUID)                                              |
+| Language     | TypeScript (strict)                                                   |
+| Path aliases | `@/*` maps to the project root                                        |
 
-Experiments enabled in `app.json`: **typed routes**, **React Compiler**, **New Architecture**.
+The app config also enables typed routes and React Compiler in app.json.
 
 ---
 
 ## Directory structure
 
-```
+```text
 FinDash/
-├── assets/images/          # App icons, splash screen, favicon
-├── docs/                   # Project documentation
+├── assets/                  # Images and icons
+├── docs/                    # Documentation
 ├── src/
-│   ├── app/                # expo-router routes (thin wrappers)
-│   │   ├── _layout.tsx     # Root stack, DB initialization
-│   │   ├── _layout.web.tsx # Web-specific root layout (navbar)
+│   ├── app/                 # expo-router routes and layouts
+│   │   ├── _layout.tsx      # Root stack and DB initialization
+│   │   ├── _layout.web.tsx
 │   │   ├── add-transaction.tsx
 │   │   └── (tabs)/
-│   │       ├── _layout.tsx       # Bottom tab navigator (native)
-│   │       ├── _layout.web.tsx   # Stack layout (web)
-│   │       ├── index.tsx         # Home tab → HomeScreen
-│   │       ├── index.web.tsx     # Web home placeholder
-│   │       ├── home.web.css      # Web-only home styles
+│   │       ├── _layout.tsx
+│   │       ├── _layout.web.tsx
+│   │       ├── index.tsx
+│   │       ├── index.web.tsx
+│   │       ├── home.web.css
 │   │       ├── stats.tsx
 │   │       └── settings.tsx
-│   ├── screens/            # Feature screen implementations
+│   ├── screens/             # Home, add transaction, and placeholder screens
 │   ├── components/
-│   │   ├── ui/             # Reusable form and layout primitives
-│   │   ├── charts/         # Income/expense and category charts
-│   │   └── transactions/   # Transaction list and row components
-│   ├── context/            # React context providers (scaffolding)
-│   ├── hooks/              # Custom hooks (scaffolding)
+│   │   ├── ui/              # Shared UI elements
+│   │   ├── charts/          # Income/expense and category charts
+│   │   └── transactions/    # Transaction list and row rendering
+│   ├── context/             # Context scaffolding
+│   ├── hooks/               # Hook scaffolding
 │   ├── services/
-│   │   ├── db/             # Raw SQLite operations
-│   │   ├── transactions.ts # Transaction service facade
-│   │   └── categories.ts   # Static category registry
-│   ├── types/              # Domain TypeScript types
-│   └── utils/              # Formatting and stats helpers
+│   │   ├── db/              # Raw SQLite operations
+│   │   ├── transactions.ts  # Transaction facade
+│   │   └── categories.ts    # Static category registry
+│   ├── types/               # Domain type definitions
+│   └── utils/               # Formatting and stats helpers
 ├── app.json
 ├── package.json
 └── tsconfig.json
@@ -122,86 +113,61 @@ FinDash/
 
 ### 1. Routing (`src/app`)
 
-Routes are **thin entry points**. They delegate to screen components in `src/screens` and configure navigation chrome (headers, tabs).
+Routes are thin entry points that delegate to screen components and configure navigation chrome.
 
-| Route file | Path | Screen / behavior |
-|------------|------|-----------------|
-| `(tabs)/index.tsx` | `/` | `HomeScreen` |
-| `(tabs)/stats.tsx` | `/stats` | Inline stub (not yet `StatsScreen`) |
-| `(tabs)/settings.tsx` | `/settings` | Inline stub (not yet `SettingsScreen`) |
-| `add-transaction.tsx` | `/add-transaction` | `AddTransactionScreen` |
+| Route file            | Path               | Current behavior                    |
+| --------------------- | ------------------ | ----------------------------------- |
+| `(tabs)/index.tsx`    | `/`                | Renders the home dashboard          |
+| `(tabs)/stats.tsx`    | `/stats`           | Renders a simple placeholder screen |
+| `(tabs)/settings.tsx` | `/settings`        | Renders a simple placeholder screen |
+| `add-transaction.tsx` | `/add-transaction` | Renders the transaction form        |
 
-The root layout (`_layout.tsx`) initializes the SQLite database on mount via `initDB()` before any screen renders.
+The root layout initializes the database on app start through initDB().
 
 ### 2. Screens (`src/screens`)
 
-Screens orchestrate user flows: fetch data, compute derived values, compose components, and handle navigation.
-
-| Screen | Status | Responsibility |
-|--------|--------|----------------|
-| `HomeScreen` | Implemented | Dashboard: balance cards, charts, recent transactions, FAB to add |
-| `AddTransactionScreen` | Implemented | Form to create income/expense entries |
-| `StatsScreen` | Empty file | Planned: dedicated analytics view |
-| `SettingsScreen` | Empty file | Planned: preferences, currency, theme |
-| `TransactionDetailsScreen` | Empty file | Planned: view/edit/delete single transaction |
+| Screen                   | Status      | Responsibility                                       |
+| ------------------------ | ----------- | ---------------------------------------------------- |
+| HomeScreen               | Implemented | Shows summary cards, charts, and recent transactions |
+| AddTransactionScreen     | Implemented | Creates a new transaction and saves it to SQLite     |
+| StatsScreen              | Placeholder | Not yet a full analytics experience                  |
+| SettingsScreen           | Placeholder | Not yet a settings experience                        |
+| TransactionDetailsScreen | Placeholder | Not implemented                                      |
 
 ### 3. Components (`src/components`)
 
-Organized by concern:
+- ui: reusable form and layout primitives
+- charts: income/expense and category charts
+- transactions: transaction list and row rendering
 
-- **`ui/`** — Generic building blocks: `Button`, `Card`, `InputField`, `DropdownInputField`, `DateInputField`, `Modal`, `SegmentedControl`
-- **`charts/`** — `IncomeExpenseChart` (bar), `CategoryPieChart` (donut). Currently use **demo data**; not yet connected to live transactions
-- **`transactions/`** — `TransactionList`, `TransactionItem` for rendering recent activity
+The chart components are currently connected to live transaction data from the service layer.
 
 ### 4. Services (`src/services`)
 
-Two-tier service design:
+The current data flow is:
 
+```text
+Screen -> services/transactions.ts -> services/db/transactions.ts -> SQLite
 ```
-Screen → services/transactions.ts → services/db/transactions.ts → SQLite
-```
 
-| Module | Role |
-|--------|------|
-| `services/db/transactions.ts` | Low-level SQLite: `initDB`, `addTransaction`, `getTransactions`, `deleteTransaction` |
-| `services/transactions.ts` | Facade: `saveTransaction`, `getAllTransactions` |
-| `services/categories.ts` | Static `Categories` map: label, Ionicons icon, color per `CategoryType` |
-
-Database details are documented in [DATA_MODEL.md](./DATA_MODEL.md).
+| Module                      | Role                                                                              |
+| --------------------------- | --------------------------------------------------------------------------------- |
+| services/db/transactions.ts | Low-level SQLite work: initDB, addTransaction, getTransactions, deleteTransaction |
+| services/transactions.ts    | Facade over database operations for screens                                       |
+| services/categories.ts      | Static category registry with label, icon, color, and gradient values             |
 
 ### 5. Types (`src/types`)
 
-| Type | File | Purpose |
-|------|------|---------|
-| `TransactionDb` | `Transaction.ts` | Shape stored in SQLite (`date` as ISO string) |
-| `TransactionType` | `Transaction.ts` | UI-enriched shape (`date` as `Date`, icon, color) |
-| `CategoryType` | `Category.ts` | Union of allowed category keys |
-| Stats types | `Stats.ts` | Empty — planned for chart/report payloads |
+| Type            | File           | Purpose                                         |
+| --------------- | -------------- | ----------------------------------------------- |
+| TransactionDb   | Transaction.ts | Persistence shape stored in SQLite              |
+| TransactionType | Transaction.ts | UI-friendly shape for list and detail rendering |
+| CategoryType    | Category.ts    | Allowed category keys                           |
+| CategorySlice   | Category.ts    | Pie-chart slice metadata                        |
 
-### 6. Context and hooks (planned)
+### 6. Context and hooks
 
-These directories define the **target state management pattern** but are currently empty placeholders:
-
-| Module | Intended role |
-|--------|---------------|
-| `TransactionsContext` | Global transaction list, CRUD, refresh after mutations |
-| `CategoriesContext` | Category metadata access |
-| `ThemeContext` | Light/dark mode, currency preference |
-| `useTransactions` | Transaction fetch/mutate hooks |
-| `useCategories` | Category helpers |
-| `useStats` | Aggregated stats for charts |
-| `useSQLite` | Database readiness / connection hook |
-
-When implemented, screens should consume hooks instead of calling services directly. This will eliminate duplicate fetches (e.g. `HomeScreen` reloading on every mount) and keep charts in sync with new transactions.
-
-### 7. Utilities (`src/utils`)
-
-| File | Status | Purpose |
-|------|--------|---------|
-| `formatDate.ts` | Implemented | Formats dates as `Feb 15, 2026` |
-| `formatCurrency.ts` | Empty | Planned: locale-aware currency display |
-| `calculateStats.ts` | Empty | Planned: income/expense/category aggregations |
-| `constants.ts` | Empty | Planned: shared magic numbers and config |
+The directories for context and hooks exist and are intended for future state sharing, but they are not yet wired into the UI. The current implementation relies on screen-level state and direct service calls.
 
 ---
 
@@ -209,24 +175,24 @@ When implemented, screens should consume hooks instead of calling services direc
 
 ```mermaid
 flowchart LR
-    subgraph tabs [Tab Navigator - Native]
-        Home["/ (index)"]
+    subgraph tabs [Tab navigator]
+        Home["/"]
         Stats["/stats"]
         Settings["/settings"]
     end
 
-    subgraph stack [Root Stack]
+    subgraph stack [Root stack]
         tabs
         AddTx["/add-transaction"]
     end
 
-    Home -->|"FAB / router.push"| AddTx
-    AddTx -->|"router.navigate"| Home
+    Home -->|FAB| AddTx
+    AddTx -->|navigate back| Home
 ```
 
-**Native (iOS/Android):** Bottom tabs for Home, Stats, Settings. Add Transaction is a modal stack screen pushed from the Home FAB.
+On native platforms, the app uses bottom tabs for Home, Stats, and Settings. The add-transaction flow is a route that returns to the main tab stack.
 
-**Web:** Custom top navbar in `_layout.web.tsx` replaces bottom tabs. `(tabs)/_layout.web.tsx` uses a flat `Stack` with hidden headers. Home has a separate `index.web.tsx` placeholder with CSS grid layout — not yet sharing logic with `HomeScreen`.
+Web has its own layout variants under src/app, including a web-specific home placeholder.
 
 ---
 
@@ -237,18 +203,18 @@ flowchart LR
 ```mermaid
 sequenceDiagram
     participant User
-    participant AddScreen as AddTransactionScreen
+    participant Screen as AddTransactionScreen
     participant Service as services/transactions
     participant DB as services/db/transactions
     participant SQLite as findex.db
 
-    User->>AddScreen: Fill form and submit
-    AddScreen->>AddScreen: Validate type, category, amount
-    AddScreen->>AddScreen: Generate UUID (expo-crypto)
-    AddScreen->>Service: saveTransaction(tx)
+    User->>Screen: Fill form and submit
+    Screen->>Screen: Validate required fields
+    Screen->>Screen: Create UUID
+    Screen->>Service: saveTransaction(tx)
     Service->>DB: addTransaction(tx)
     DB->>SQLite: INSERT INTO transactions
-    AddScreen->>AddScreen: router.navigate("/(tabs)")
+    Screen->>Screen: Navigate back to the tabs
 ```
 
 ### Loading the home dashboard
@@ -257,14 +223,46 @@ sequenceDiagram
 sequenceDiagram
     participant Home as HomeScreen
     participant Service as getAllTransactions
-    participant DB as SQLite
+    participant DB as services/db/transactions
+    participant SQLite as findex.db
 
-    Home->>Service: getAllTransactions() on mount
-    Service->>DB: SELECT * ORDER BY date DESC
-    DB-->>Home: TransactionDb[]
-    Home->>Home: Compute income, expenses, balance, savings rate
-    Home->>Home: Map to TransactionType with category icons/colors
-    Home->>Home: Render cards, charts (demo), recent list (live)
+    Home->>Service: getAllTransactions()
+    Service->>DB: getTransactions()
+    DB->>SQLite: SELECT * FROM transactions ORDER BY date DESC
+    SQLite-->>DB: Transaction rows
+    DB-->>Home: Transaction list
+    Home->>Home: Compute summary metrics and chart data
+```
+
+---
+
+## Implementation status
+
+| Feature                         | Status      | Notes                                             |
+| ------------------------------- | ----------- | ------------------------------------------------- |
+| Transaction entry               | Implemented | Uses expo-crypto UUIDs and saves to SQLite        |
+| Home dashboard                  | Implemented | Summary cards and charts use persisted data       |
+| Recent transactions             | Implemented | Shows the latest five entries                     |
+| Stats screen                    | Placeholder | Basic text-only screen                            |
+| Settings screen                 | Placeholder | Basic text-only screen                            |
+| Transaction details/edit/delete | Planned     | DB layer already has delete support, UI not wired |
+| Shared state layer              | Planned     | Context and hooks are scaffolded but not active   |
+
+---
+
+## Related documentation
+
+- [README.md](../README.md)
+- [DATA_MODEL.md](./DATA_MODEL.md)
+- [DEVELOPMENT.md](./DEVELOPMENT.md)
+
+  Home->>Service: getAllTransactions() on mount
+  Service->>DB: SELECT \* ORDER BY date DESC
+  DB-->>Home: TransactionDb[]
+  Home->>Home: Compute income, expenses, balance, savings rate
+  Home->>Home: Map to TransactionType with category icons/colors
+  Home->>Home: Render cards, charts (demo), recent list (live)
+
 ```
 
 **Note:** Summary card trend percentages (`12.5% from last month`) are hardcoded placeholders. Charts on Home still render demo datasets.
@@ -345,3 +343,4 @@ Use `@/src/...` imports (configured in `tsconfig.json` as `@/*` → project root
 - [DATA_MODEL.md](./DATA_MODEL.md) — Database schema, types, and category registry
 - [DEVELOPMENT.md](./DEVELOPMENT.md) — Local setup, scripts, and contribution guidelines
 - [README.md](../README.md) — Project overview and quick start
+```
